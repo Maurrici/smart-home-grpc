@@ -1,3 +1,4 @@
+import { WebSocketServer } from 'ws';
 import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
 const PROTO_PATH = './smart_home.proto';
@@ -19,6 +20,8 @@ const client = new grpcService(serverAddress, grpc.credentials.createInsecure())
 // ENUMS
 const ACTUATOR = { LAMP: "LAMP", THERMOSTAT: "THERMOSTAT", IRRIGATOR: "IRRIGATOR" }
 const SENSOR = { PRESENCE: "PRESENCE", TEMPERATURE: "TEMPERATURE", HUMIDITY: "HUMIDITY" }
+
+var availableObjects = [];
 
 // Chamadas para o servidor
 function getActuatorValue(type) {
@@ -52,6 +55,11 @@ function getSensorValues(type) {
   // Recebe os dados da comunicação
   call.on('data', (response) => {
     console.log('Mensagem recebida:', response);
+    clientsSockets.forEach(c => {
+      if(c?.sensorsObserve){
+        c?.socket?.send(response)
+      }
+    })
   });
 
   // Executado ao fim da comunicação
@@ -65,12 +73,58 @@ function getSensorValues(type) {
   });
 }
 
+// Verify objects in service
+getActuatorValue(ACTUATOR.LAMP).then(res => {
+  if(res.type != "error") availableObjects.push(ACTUATOR.LAMP);
+})
+getActuatorValue(ACTUATOR.THERMOSTAT).then(res => {
+  if(res.type != "error") availableObjects.push(ACTUATOR.THERMOSTAT);
+})
 getActuatorValue(ACTUATOR.IRRIGATOR).then(res => {
-  console.log(res);
+  if(res.type != "error") availableObjects.push(ACTUATOR.IRRIGATOR);
 })
-
-setActuatorValue(ACTUATOR.THERMOSTAT, "29").then(res => {
-  console.log(res)
-})
-
 getSensorValues(SENSOR.PRESENCE)
+getSensorValues(SENSOR.TEMPERATURE)
+getSensorValues(SENSOR.HUMIDITY)
+
+// Websocket
+const websocket = new WebSocketServer({port: 5001})
+
+const clientsSockets = []
+websocket.on("connection", (clientSocket) => {
+  clientsSockets.push({
+    socket: clientSocket,
+    sensorsObserve: false
+  });
+
+  clientSocket.send(availableObjects); // Retornando objetos disponíveis
+
+  clientSocket.on('message', (request) => {
+    switch(request.type){
+      case "SET_ACTUATOR":
+        setActuatorValue(request.objectType, request.value).then(res => {
+          clientSocket.send(res)
+        })
+        break
+      case "GET_ACTUATOR":
+        getActuatorValue(request.objectType).then(res => {
+          clientSocket.send(res)
+        })
+        break
+      case "GET_SENSOR":
+        clientsSockets = clientsSockets.map(c => {
+          if(c == clientSocket){
+            c.sensorsObserve = true
+          }
+        })
+        break
+      case "GET_OBJECTS":
+        clientSocket.send(availableObjects);
+        break
+    }
+  })
+
+  clientSocket.on('close', function() {
+    sockets = sockets.filter(c => c.socket !== clientSocket);
+  });
+})
