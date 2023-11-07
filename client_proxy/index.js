@@ -90,16 +90,17 @@ getSensorValues(SENSOR.HUMIDITY)
 // Websocket
 const websocket = new WebSocketServer({port: 5001})
 
-const clientsSockets = []
+var clientsSockets = []
 websocket.on("connection", (clientSocket) => {
   clientsSockets.push({
     socket: clientSocket,
     sensorsObserve: false
   });
 
-  clientSocket.send(availableObjects); // Retornando objetos disponíveis
+  clientSocket.send(JSON.stringify(availableObjects)); // Retornando objetos disponíveis
 
   clientSocket.on('message', (request) => {
+    request = JSON.parse(request)
     switch(request.type){
       case "SET_ACTUATOR":
         setActuatorValue(request.objectType, request.value).then(res => {
@@ -119,12 +120,13 @@ websocket.on("connection", (clientSocket) => {
         })
         break
       case "GET_OBJECTS":
-        clientSocket.send(availableObjects);
+        console.log("Pingou")
+        clientSocket.send(JSON.stringify(availableObjects));
         break
     }
   })
 
   clientSocket.on('close', function() {
-    sockets = sockets.filter(c => c.socket !== clientSocket);
+    clientsSockets = clientsSockets.filter(c => c.socket !== clientSocket);
   });
 })
