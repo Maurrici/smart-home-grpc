@@ -1,5 +1,8 @@
 import {useState, useEffect} from 'react';
+import { Row, Col } from 'react-bootstrap';
+import Object from './components/Object';
 import './App.css';
+import { SensorTypes } from './interfaces/ObjectTypes';
 
 function App() {
   const [isConected, setIsConected] = useState<boolean>(false);
@@ -36,6 +39,22 @@ function App() {
       {!isConected && <h1>Tentando conectar</h1>}
       <button onClick={handleSendMessage}>Get Objects</button>
       <button onClick={handleSetActuator}>Set Lamp</button>
+
+      <div className="containter">
+        <Row className='justify-content-around'>
+          <Col sm={12} md={3} className='px-0'>
+            <Object type={SensorTypes.PRESENCE}></Object>
+            <Object type={SensorTypes.TEMPERATURE}></Object>
+            <Object type={SensorTypes.HUMIDITY}></Object>
+          </Col>
+
+          <Col sm={12} md={5}>
+          </Col>
+
+          <Col sm={12} md={3}>
+          </Col>
+        </Row>
+      </div>
     </div>
   )
 }
