@@ -5,7 +5,8 @@ interface ObjectProps {
     invert?: Boolean,
     isAvailable: boolean,
     type: ActuatorTypes,
-    value: string
+    value: string,
+    setValue: (type: ActuatorTypes, value: string) => void
 }
 
 enum Status {
@@ -13,7 +14,7 @@ enum Status {
     off = "OFF"
 }
 
-const ObjectActuator = ({type, invert=false, isAvailable, value}: ObjectProps) => {
+const ObjectActuator = ({type, invert=false, isAvailable, value, setValue}: ObjectProps) => {
     const getObjectTitle = (): string => {
         switch(type){
             case ActuatorTypes.LAMP: return "Lâmpada"
@@ -34,6 +35,18 @@ const ObjectActuator = ({type, invert=false, isAvailable, value}: ObjectProps) =
         }
     }
 
+    const handleActionLeft = () => {
+        if(type == ActuatorTypes.IRRIGATOR && value != Status.on) setValue(type, Status.on);
+        if(type == ActuatorTypes.LAMP && value != Status.on) setValue(type, Status.on);
+        if(type == ActuatorTypes.THERMOSTAT) setValue(type, (parseInt(value) + 1).toString());
+    }
+
+    const handleActionRight = () => {
+        if(type == ActuatorTypes.IRRIGATOR && value != Status.off) setValue(type, Status.off);
+        if(type == ActuatorTypes.LAMP && value != Status.off) setValue(type, Status.off);
+        if(type == ActuatorTypes.THERMOSTAT) setValue(type, (parseInt(value) - 1).toString());
+    }
+
     return(
         <div className={`card-object ${invert ? "invert" : ""} ${isAvailable ? "opacity" : ""}`}>
             <h3>{getObjectTitle()}</h3>
@@ -44,15 +57,15 @@ const ObjectActuator = ({type, invert=false, isAvailable, value}: ObjectProps) =
                 </Col>
 
                 <Col sm={12} className="card-control d-flex justify-content-center">
-                    <button className={`left ${value == Status.on ? 'active' : ''}`}>
+                    <button className={`left ${value == Status.on ? 'active' : ''}`} onClick={handleActionLeft}>
                         {type == ActuatorTypes.THERMOSTAT ? <img src="/img/arrow.png" width={40} height={40} /> : "Ligar"}
                     </button>
 
                     {
-                        type == ActuatorTypes.THERMOSTAT && <input value={value} type="number" min={0} max={100} />
+                        type == ActuatorTypes.THERMOSTAT && <input value={value} type="number" min={0} max={100} onChange={(e) => setValue(ActuatorTypes.THERMOSTAT, e.target.value)} />
                     }
 
-                    <button className={`right ${value == Status.off ? 'active' : ''}`}>
+                    <button className={`right ${value == Status.off ? 'active' : ''}`} onClick={handleActionRight}>
                         {type == ActuatorTypes.THERMOSTAT ? <img src="/img/arrow.png" className="rotate" width={40} height={40} /> : "Desligar"}
                     </button>
                 </Col>

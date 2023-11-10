@@ -25,6 +25,14 @@ const ObjectSensor = ({type, invert=false, isAvailable, value}: ObjectProps) => 
         }
     }
 
+    const getUnitValue = () => {
+        switch(type){
+            case SensorTypes.PRESENCE:  return ""
+            case SensorTypes.TEMPERATURE: return "°C"
+            case SensorTypes.HUMIDITY: return "%"
+        }
+    }
+
     return(
         <div className={`card-object ${invert ? "invert" : ""} ${isAvailable ? "opacity" : ""}`}>
             <h3>{getObjectTitle()}</h3>
@@ -35,7 +43,7 @@ const ObjectSensor = ({type, invert=false, isAvailable, value}: ObjectProps) => 
                 </Col>
 
                 <Col sm={6} className="card-data text-center">
-                    {value}
+                    {value} {getUnitValue()}
                 </Col>
             </Row>
         </div>

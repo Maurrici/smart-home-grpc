@@ -57,10 +57,12 @@ function getSensorValues(type) {
   // Recebe os dados da comunicação
   call.on('data', (response) => {
     console.log('Mensagem recebida:', response);
+    if(!availableObjects.includes(type)) availableObjects.push(type);
+    
     clientsSockets.forEach(c => {
       if(c?.sensorsObserve){
-        response.actuatorType = type
-        c?.socket?.send(JSON.stringify(response))
+        let res = { values: response.values, type: type}
+        c?.socket?.send(JSON.stringify(res))
       }
     })
   });
@@ -100,40 +102,43 @@ websocket.on("connection", (clientSocket) => {
     sensorsObserve: false
   });
 
-  clientSocket.send(JSON.stringify(availableObjects)); // Retornando objetos disponíveis
+  clientSocket.send(JSON.stringify({ values: availableObjects, type: "connection"})); // Retornando objetos disponíveis
 
   clientSocket.on('message', (request) => {
     request = JSON.parse(request)
     switch(request.type){
       case "SET_ACTUATOR":
         setActuatorValue(request.objectType, request.value).then(res => {
-          res.actuatorType = request.type
-          clientSocket.send(JSON.stringify(res))
+          let respose = { values: res, type: request.objectType}
+          clientSocket.send(JSON.stringify(respose))
         })
         .catch(err => console.log("Erro ao enviar: ", request))
         break
       case "GET_ACTUATOR":
         getActuatorValue(request.objectType).then(res => {
-          res.actuatorType = request.type
-          clientSocket.send(JSON.stringify(res))
+          let respose = { values: res, type: request.objectType}
+          clientSocket.send(JSON.stringify(respose))
         })
         .catch(err => console.log("Erro ao enviar: ", request))
         break
       case "GET_SENSOR":
         clientsSockets = clientsSockets.map(c => {
-          if(c == clientSocket){
+          if(c.socket == clientSocket){
             c.sensorsObserve = true
           }
+
+          return c
         })
         break
       case "GET_OBJECTS":
-        console.log("Pingou")
-        clientSocket.send(JSON.stringify(availableObjects));
+        let response = { values: availableObjects, type: "connection"}
+        clientSocket.send(JSON.stringify(response));
         break
     }
   })
 
   clientSocket.on('close', function() {
-    clientsSockets = clientsSockets.filter(c => c.socket !== clientSocket);
+    console.log("Client saiu")
+    clientsSockets = clientsSockets.filter(c => c?.socket !== clientSocket);
   });
 })
