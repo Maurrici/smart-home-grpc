@@ -5,6 +5,25 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
+h1, h2 {
+  color: #FFF;
+}
+
+button.update {
+  border-radius: 8px;
+  box-shadow: 2px 5px 10px #00FFDE;
+}
+
+.logo-ufc {
+  width: 200px;
+  height: 250px;
+}
+
+.opacity {
+  pointer-events: none;
+  opacity: 0.3;
+}
+
 .card-object {
   display: flex;
   flex-direction: column;
@@ -31,6 +50,17 @@ body {
   background-color: #2F3D40;
 }
 
+.card-object.invert::after {
+  content: "";
+  position: absolute;
+  bottom: -25px;
+  left: -25px;
+  width: 50px;
+  height: 50px;
+  transform: rotate(-45deg);
+  background-color: #2F3D40;
+}
+
 .card-object h3 {
   width: 100%;
   text-align: center;
@@ -45,3 +75,65 @@ body {
 .card-object .card-data {
   font-size: 3rem;
 }
+
+/* Controles de objetos */
+
+.card-control button, .card-control input {
+  height: 40px;
+  min-width: 90px;
+  border: none;
+  background-color: #182938;
+  color: #00FFDE;
+}
+
+.card-control button:hover{
+  transform: scale(0.95);
+}
+
+.card-control button.active{
+  background-color:#00FFDE;
+  color:#182938;
+}
+
+.card-control button.left{
+  border-radius: 8px 0px 0px 8px;
+  border-right: 1px solid #00FFDE;
+}
+.card-control button.left.active{
+  border-right: 1px solid #182938;
+}
+
+.card-control button.right{
+  border-radius: 0px 8px 8px 0px;
+  border-left: 1px solid #00FFDE;
+}
+.card-control button.right.active{
+  border-right: 1px solid #182938;
+}
+
+.card-control input::-webkit-outer-spin-button,
+.card-control input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.card-control input {
+  text-align: center;
+  min-width: 60px !important;
+}
+
+.card-control input:focus {
+  outline: none !important;
+  border:1px solid #00FFDE;
+  box-shadow: 0 0 10px #719ECE;
+}
+
+.card-control img {
+  width: 24px;
+  height: 24px;
+}
+
+.rotate {
+  transform: rotate(180deg);
+}
+

@@ -2,15 +2,15 @@ import { ActuatorTypes, SensorTypes } from "../interfaces/ObjectTypes";
 import { Row, Col } from 'react-bootstrap';
 
 interface ObjectProps {
-    type: ActuatorTypes | SensorTypes
+    invert?: Boolean,
+    isAvailable: boolean,
+    type: SensorTypes,
+    value: string
 }
 
-const Object = ({type}: ObjectProps) => {
+const ObjectSensor = ({type, invert=false, isAvailable, value}: ObjectProps) => {
     const getObjectTitle = (): string => {
         switch(type){
-            case ActuatorTypes.LAMP: return "Lâmpada"
-            case ActuatorTypes.THERMOSTAT: return "Termostato"
-            case ActuatorTypes.IRRIGATOR: return "Irrigador"
             case SensorTypes.PRESENCE:  return "Presença"
             case SensorTypes.TEMPERATURE: return "Temperatua"
             case SensorTypes.HUMIDITY: return "Umidade"
@@ -19,9 +19,6 @@ const Object = ({type}: ObjectProps) => {
 
     const getObjectImg = () => {
         switch(type){
-            case ActuatorTypes.LAMP: return <img src="/img/TEMPERATURE.png" alt="" />
-            case ActuatorTypes.THERMOSTAT: return <img src="/img/TEMPERATURE.png" alt="" />
-            case ActuatorTypes.IRRIGATOR: return <img src="/img/TEMPERATURE.png" alt="" />
             case SensorTypes.PRESENCE:  return <img src="/img/PRESENCE.png" alt="" />
             case SensorTypes.TEMPERATURE: return <img src="/img/TEMPERATURE.png" alt="" />
             case SensorTypes.HUMIDITY: return <img src="/img/HUMIDITY.png" alt="" />
@@ -29,7 +26,7 @@ const Object = ({type}: ObjectProps) => {
     }
 
     return(
-        <div className='card-object'>
+        <div className={`card-object ${invert ? "invert" : ""} ${isAvailable ? "opacity" : ""}`}>
             <h3>{getObjectTitle()}</h3>
             
             <Row className="align-items-center h-100 w-100">
@@ -38,11 +35,11 @@ const Object = ({type}: ObjectProps) => {
                 </Col>
 
                 <Col sm={6} className="card-data text-center">
-                    38°C
+                    {value}
                 </Col>
             </Row>
         </div>
     )
 }
 
-export default Object;
+export default ObjectSensor;

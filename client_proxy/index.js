@@ -40,9 +40,11 @@ function setActuatorValue(type, value) {
   return new Promise((resolve, reject) => {
     client.SetActuatorValues({ type: type, value: value }, (error, response) => {
       if (error) {
+        console.log(error)
         reject(error)
       } else {
-        if(response?.values?.length > 0 && response.values[0].value == value) resolve(response.values)
+        console.log(response)
+        if(response?.values?.length > 0 && response.values[0].value.toLowerCase() == value.toLowerCase()) resolve(response.values)
         else reject({type: "error", value: "Não foi possível alterar o valor do objeto"})
       }
     });
@@ -57,7 +59,8 @@ function getSensorValues(type) {
     console.log('Mensagem recebida:', response);
     clientsSockets.forEach(c => {
       if(c?.sensorsObserve){
-        c?.socket?.send(response)
+        response.actuatorType = type
+        c?.socket?.send(JSON.stringify(response))
       }
     })
   });
@@ -104,13 +107,17 @@ websocket.on("connection", (clientSocket) => {
     switch(request.type){
       case "SET_ACTUATOR":
         setActuatorValue(request.objectType, request.value).then(res => {
-          clientSocket.send(res)
+          res.actuatorType = request.type
+          clientSocket.send(JSON.stringify(res))
         })
+        .catch(err => console.log("Erro ao enviar: ", request))
         break
       case "GET_ACTUATOR":
         getActuatorValue(request.objectType).then(res => {
-          clientSocket.send(res)
+          res.actuatorType = request.type
+          clientSocket.send(JSON.stringify(res))
         })
+        .catch(err => console.log("Erro ao enviar: ", request))
         break
       case "GET_SENSOR":
         clientsSockets = clientsSockets.map(c => {
