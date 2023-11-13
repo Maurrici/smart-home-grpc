@@ -51,17 +51,17 @@ function setActuatorValue(type, value) {
   })
 }
 
-function getSensorValues(type) {
-  const call = client.GetSensorValues({ type: type });
+function getSensorValues() {
+  const call = client.GetSensorValues({ type: "" });
 
   // Recebe os dados da comunicação
   call.on('data', (response) => {
     console.log('Mensagem recebida:', response);
-    if(!availableObjects.includes(type)) availableObjects.push(type);
+    if(!availableObjects.includes(response.values[0]?.type)) availableObjects.push(response.values[0]?.type);
     
     clientsSockets.forEach(c => {
       if(c?.sensorsObserve){
-        let res = { values: response.values, type: type}
+        let res = { values: response.values, type: response.values[0]?.type}
         c?.socket?.send(JSON.stringify(res))
       }
     })
@@ -88,9 +88,8 @@ getActuatorValue(ACTUATOR.THERMOSTAT).then(res => {
 getActuatorValue(ACTUATOR.IRRIGATOR).then(res => {
   if(res.type != "error") availableObjects.push(ACTUATOR.IRRIGATOR);
 })
-getSensorValues(SENSOR.PRESENCE)
-getSensorValues(SENSOR.TEMPERATURE)
-getSensorValues(SENSOR.HUMIDITY)
+
+getSensorValues()
 
 // Websocket
 const websocket = new WebSocketServer({port: 5001})

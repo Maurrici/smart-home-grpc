@@ -27,7 +27,7 @@ function App() {
 
   socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    //console.log('Mensagem do servidor:', data);
+    console.log('Mensagem do servidor:', data);
 
     if(data.type == "connection"){
       let objList: ObjectModel[] = []
@@ -90,7 +90,7 @@ function App() {
 
   useEffect(() => {
     clearInterval(intervalRequest)
-    setIntervalRequest(setInterval(updateObjectValues, 15000))
+    setIntervalRequest(setInterval(updateObjectValues, 5000))
   }, [])
 
   return (

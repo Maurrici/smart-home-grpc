@@ -12,7 +12,7 @@ const ObjectSensor = ({type, invert=false, isAvailable, value}: ObjectProps) => 
     const getObjectTitle = (): string => {
         switch(type){
             case SensorTypes.PRESENCE:  return "Presença"
-            case SensorTypes.TEMPERATURE: return "Temperatua"
+            case SensorTypes.TEMPERATURE: return "Temperatura"
             case SensorTypes.HUMIDITY: return "Umidade"
         }
     }

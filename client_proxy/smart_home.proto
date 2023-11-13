@@ -1,12 +1,28 @@
-// Arquivo: thermostat.proto
+// Arquivo: smart_home.proto
 
 syntax = "proto3";
 
 package smart_home;
 
+message Empty{}
+
+service LampService {
+  rpc SetState(LampRequest) returns (LampResponse) {} 
+  rpc GetState(Empty) returns (LampResponse) {}
+}
+
+message LampRequest {
+  bool state = 1;
+}
+
+message LampResponse {
+  bool success = 1;
+}
+
 service ThermostatService {
   rpc SetTemperature(TemperatureRequest) returns (TemperatureResponse) {}
   rpc UpdateDesiredTemperature(TemperatureRequest) returns (TemperatureResponse) {}
+  rpc GetTemperature(Empty) returns (TemperaturaResponseNumber) {}
 }
 
 message TemperatureRequest {
@@ -17,11 +33,34 @@ message TemperatureResponse {
   bool success = 1;
 }
 
+message TemperaturaResponseNumber {
+  float temperature = 1; 
+}
+
+service IrrigatorService {
+  rpc SetHumityIrrigator(HumidityRequest) returns (IrrigatorResponse) {}
+  rpc SetStateIrrigator(IrrigatorRequest) returns (IrrigatorResponse) {}
+  rpc GetStateIrrigator(Empty) returns (IrrigatorResponse) {}
+}
+
+message HumidityRequest {
+  float humidity = 1;
+}
+
+message IrrigatorRequest {
+  bool state = 1;
+}
+
+message IrrigatorResponse {
+  bool success = 1;
+}
+
 // Service and messages to client interaction
 service ClientService {
   rpc SetActuatorValues(ActuatorRequest) returns (ObjectResponse);
   rpc GetActuatorValues(ActuatorRequest) returns (ObjectResponse);
   rpc GetSensorValues(SensorRequest) returns (stream ObjectResponse);
+  rpc GetSensorValues2(SensorRequest) returns (stream ObjectResponse);
 }
 
 message ActuatorRequest {
